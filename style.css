@@ -1,0 +1,52 @@
+ /* Estilos personalizados para a aplicação de Pixel Art */
+ body {
+     font-family: 'Press Start 2P', cursive;
+     touch-action: none;
+     /* Desabilita o zoom por toque para uma melhor experiência de desenho em dispositivos móveis */
+ }
+
+ .pixel {
+     width: 100%;
+     height: 100%;
+     background-color: #ffffff;
+     border: 1px solid #f5f3ff;
+     /* Borda suave lilás */
+     transition: transform 0.1s ease;
+ }
+
+ .pixel:hover {
+     transform: scale(1.1);
+     z-index: 10;
+ }
+
+ /* Estilo para a cor/ferramenta selecionada */
+ .selected {
+     transform: scale(1.2);
+     box-shadow: 0 0 0 4px #ec4899, 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+     /* Destaque em rosa */
+ }
+
+ /* Garante que a grade mantenha a proporção de 1:1 */
+ #grid-container {
+     aspect-ratio: 1 / 1;
+ }
+
+ /* Animação de carregamento */
+ .loader {
+     border: 4px solid #fce7f3;
+     border-top: 4px solid #ec4899;
+     border-radius: 50%;
+     width: 24px;
+     height: 24px;
+     animation: spin 1s linear infinite;
+ }
+
+ @keyframes spin {
+     0% {
+         transform: rotate(0deg);
+     }
+
+     100% {
+         transform: rotate(360deg);
+     }
+ }
