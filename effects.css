@@ -1,0 +1,179 @@
+/* Estilos para Filtros e Efeitos */
+.filter-tab, .filter-btn, .effect-btn {
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.filter-tab.active {
+    background-color: rgb(168 85 247);
+    color: white;
+    border-color: rgb(147 51 234);
+}
+
+.filter-tab:not(.active) {
+    background-color: rgb(243 244 246);
+    color: rgb(107 114 128);
+}
+
+.filter-tab:not(.active):hover {
+    background-color: rgb(229 231 235);
+    color: rgb(75 85 99);
+}
+
+.dark .filter-tab:not(.active) {
+    background-color: rgb(55 65 81);
+    color: rgb(156 163 175);
+}
+
+.dark .filter-tab:not(.active):hover {
+    background-color: rgb(75 85 99);
+    color: rgb(209 213 219);
+}
+
+.filter-btn, .effect-btn {
+    background-color: rgb(249 250 251);
+    border-color: rgb(209 213 219);
+    border-radius: 0.5rem;
+    min-height: 3rem;
+}
+
+.filter-btn:hover, .effect-btn:hover {
+    background-color: rgb(243 244 246);
+    border-color: rgb(168 85 247);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.filter-btn.active, .effect-btn.active {
+    background-color: rgb(168 85 247);
+    color: white;
+    border-color: rgb(147 51 234);
+}
+
+.dark .filter-btn, .dark .effect-btn {
+    background-color: rgb(31 41 55);
+    border-color: rgb(75 85 99);
+    color: rgb(209 213 219);
+}
+
+.dark .filter-btn:hover, .dark .effect-btn:hover {
+    background-color: rgb(55 65 81);
+    border-color: rgb(168 85 247);
+}
+
+.dark .filter-btn.active, .dark .effect-btn.active {
+    background-color: rgb(168 85 247);
+    color: white;
+    border-color: rgb(147 51 234);
+}
+
+/* Animações para Efeitos */
+.effect-preview {
+    position: relative;
+    overflow: hidden;
+}
+
+.effect-preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 1.5s infinite;
+    z-index: 1;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Estilos para Formas Geométricas */
+.shape-preview {
+    position: absolute;
+    pointer-events: none;
+    border: 2px dashed rgba(168, 85, 247, 0.6);
+    background-color: rgba(168, 85, 247, 0.1);
+    z-index: 10;
+}
+
+.shape-filled {
+    background-color: rgba(168, 85, 247, 0.3);
+}
+
+/* Canvas para Preview de Efeitos */
+.effect-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    opacity: 0.8;
+    z-index: 5;
+}
+
+/* Sistema de Camadas */
+.layer-item {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.layer-item:hover {
+    background-color: rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+.layer-item.active {
+    background-color: rgba(168, 85, 247, 0.2);
+    border-color: rgba(168, 85, 247, 0.5);
+}
+
+.layer-visibility {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.layer-visibility.hidden {
+    opacity: 0.3;
+}
+
+.layer-visibility.hidden i::before {
+    content: "\f070"; /* fa-eye-slash */
+}
+
+.layer-blend, .layer-opacity {
+    font-size: 10px;
+}
+
+.layer-opacity {
+    width: 60px;
+}
+
+/* Drag and Drop para Camadas */
+.layer-item.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+}
+
+.layer-item.drag-over {
+    border-top: 2px solid rgba(168, 85, 247, 0.8);
+}
+
+/* Responsive para Camadas */
+@media (max-width: 768px) {
+    .layer-item {
+        font-size: 12px;
+    }
+    
+    .layer-blend {
+        font-size: 9px;
+    }
+    
+    .layer-opacity {
+        width: 50px;
+    }
+}
