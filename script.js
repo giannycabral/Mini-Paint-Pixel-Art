@@ -1883,6 +1883,35 @@ function getTrianglePixels(startPixel, endPixel) {
   const gridSize = parseInt(gridSizeSelector.value);
   const pixels = Array.from(gridContainer.children);
 
+  // Extract shape parameters
+  const shapeDimensions = getShapeDimensions(startPixel, endPixel, pixels, gridSize);
+  const { centerRow, centerCol, radius } = shapeDimensions;
+  
+  console.log(
+    `Triângulo - centro: (${centerRow},${centerCol}), raio: ${radius}`
+  );
+
+  const fillMode =
+    document.querySelector('input[name="fill-mode"]:checked')?.value ||
+    "outline";
+  const isFilled = fillMode === "filled";
+  
+  // Collect pixels for the triangle
+  const trianglePixels = collectTrianglePixels(
+    centerRow, 
+    centerCol, 
+    radius, 
+    isFilled, 
+    gridSize, 
+    pixels
+  );
+
+  console.log(`Triângulo gerou ${trianglePixels.length} pixels`);
+  return trianglePixels;
+}
+
+// Helper function to calculate shape dimensions
+function getShapeDimensions(startPixel, endPixel, pixels, gridSize) {
   const startIndex = pixels.indexOf(startPixel);
   const endIndex = pixels.indexOf(endPixel);
 
@@ -1898,38 +1927,49 @@ function getTrianglePixels(startPixel, endPixel) {
     Math.abs(endCol - startCol)
   );
   const radius = Math.floor(size / 2);
+  
+  return { centerRow, centerCol, radius };
+}
 
-  console.log(
-    `Triângulo - centro: (${centerRow},${centerCol}), raio: ${radius}`
-  );
-
-  const fillMode =
-    document.querySelector('input[name="fill-mode"]:checked')?.value ||
-    "outline";
+// Helper function to collect triangle pixels
+function collectTrianglePixels(centerRow, centerCol, radius, isFilled, gridSize, pixels) {
   const trianglePixels = [];
+  
+  // Iterate through potential triangle area
+  iterateTriangleArea(radius, (row, col) => {
+    if (isInTriangle(row, col, radius, isFilled)) {
+      const pixelRow = centerRow + row;
+      const pixelCol = centerCol + col;
+      
+      addPixelIfValid(pixelRow, pixelCol, gridSize, pixels, trianglePixels);
+    }
+  });
+  
+  return trianglePixels;
+}
 
+// Extracts the nested loops to reduce complexity
+function iterateTriangleArea(radius, callback) {
   for (let row = -radius; row <= radius; row++) {
     for (let col = -radius; col <= radius; col++) {
-      if (isInTriangle(row, col, radius, fillMode === "filled")) {
-        const pixelRow = centerRow + row;
-        const pixelCol = centerCol + col;
-        if (
-          pixelRow >= 0 &&
-          pixelRow < gridSize &&
-          pixelCol >= 0 &&
-          pixelCol < gridSize
-        ) {
-          const pixelIndex = pixelRow * gridSize + pixelCol;
-          if (pixelIndex >= 0 && pixelIndex < pixels.length) {
-            trianglePixels.push(pixels[pixelIndex]);
-          }
-        }
-      }
+      callback(row, col);
     }
   }
+}
 
-  console.log(`Triângulo gerou ${trianglePixels.length} pixels`);
-  return trianglePixels;
+// Extracts the pixel validation and addition logic
+function addPixelIfValid(row, col, gridSize, pixels, pixelArray) {
+  if (isWithinGrid(row, col, gridSize)) {
+    const pixelIndex = row * gridSize + col;
+    if (pixelIndex >= 0 && pixelIndex < pixels.length) {
+      pixelArray.push(pixels[pixelIndex]);
+    }
+  }
+}
+
+// Helper function to check if coordinates are within grid bounds
+function isWithinGrid(row, col, gridSize) {
+  return row >= 0 && row < gridSize && col >= 0 && col < gridSize;
 }
 
 function drawDiamond(startPixel, endPixel) {
@@ -1945,48 +1985,37 @@ function getDiamondPixels(startPixel, endPixel) {
   const gridSize = parseInt(gridSizeSelector.value);
   const pixels = Array.from(gridContainer.children);
 
-  const startIndex = pixels.indexOf(startPixel);
-  const endIndex = pixels.indexOf(endPixel);
-
-  const startRow = Math.floor(startIndex / gridSize);
-  const startCol = startIndex % gridSize;
-  const endRow = Math.floor(endIndex / gridSize);
-  const endCol = endIndex % gridSize;
-
-  const centerRow = Math.round((startRow + endRow) / 2);
-  const centerCol = Math.round((startCol + endCol) / 2);
-  const size = Math.max(
-    Math.abs(endRow - startRow),
-    Math.abs(endCol - startCol)
-  );
-  const radius = Math.floor(size / 2);
-
+  // Extract shape parameters
+  const shapeDimensions = getShapeDimensions(startPixel, endPixel, pixels, gridSize);
+  const { centerRow, centerCol, radius } = shapeDimensions;
+  
   const fillMode =
     document.querySelector('input[name="fill-mode"]:checked')?.value ||
     "outline";
+    
+  const isFilled = fillMode === "filled";
   const diamondPixels = [];
-
-  for (let row = -radius; row <= radius; row++) {
-    for (let col = -radius; col <= radius; col++) {
-      if (isInDiamond(row, col, radius, fillMode === "filled")) {
-        const pixelRow = centerRow + row;
-        const pixelCol = centerCol + col;
-        if (
-          pixelRow >= 0 &&
-          pixelRow < gridSize &&
-          pixelCol >= 0 &&
-          pixelCol < gridSize
-        ) {
-          const pixelIndex = pixelRow * gridSize + pixelCol;
-          if (pixelIndex >= 0 && pixelIndex < pixels.length) {
-            diamondPixels.push(pixels[pixelIndex]);
-          }
-        }
-      }
+  
+  // Collect pixels for the diamond
+  collectDiamondPixels(radius, (row, col) => {
+    if (isInDiamond(row, col, radius, isFilled)) {
+      const pixelRow = centerRow + row;
+      const pixelCol = centerCol + col;
+      
+      addPixelIfValid(pixelRow, pixelCol, gridSize, pixels, diamondPixels);
     }
-  }
+  });
 
   return diamondPixels;
+}
+
+// Helper function to collect diamond pixels
+function collectDiamondPixels(radius, callback) {
+  for (let row = -radius; row <= radius; row++) {
+    for (let col = -radius; col <= radius; col++) {
+      callback(row, col);
+    }
+  }
 }
 
 function drawStar(startPixel, endPixel) {
