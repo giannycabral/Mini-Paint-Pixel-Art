@@ -11,6 +11,7 @@
 
     <!-- CSS customizado -->
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/effects.css">
 
     <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -202,7 +203,7 @@
                         <label class="text-sm font-medium text-purple-700 dark:text-purple-300">Tamanho:</label>
                         <select id="grid-size"
                             class="px-3 py-1 text-sm border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                            title="Tamanho da grade">
+                            title="Tamanho da grade" aria-label="Selecionar tamanho da grade de desenho">
                             <option value="16">16×16</option>
                             <option value="32" selected>32×32</option>
                             <option value="64">64×64</option>
@@ -213,34 +214,40 @@
                     <div class="flex items-center gap-2">
                         <label class="text-sm font-medium text-purple-700 dark:text-purple-300">Zoom:</label>
                         <button id="zoom-out" class="px-2 py-1 text-xs bg-purple-100 dark:bg-purple-800 rounded"
-                            title="Diminuir zoom">
-                            <i class="fas fa-minus"></i>
+                            title="Diminuir zoom" aria-label="Diminuir zoom do canvas">
+                            <i class="fas fa-minus" aria-hidden="true"></i>
                         </button>
-                        <span id="zoom-level" class="text-sm font-mono w-12 text-center">100%</span>
+                        <span id="zoom-level" class="text-sm font-mono w-12 text-center"
+                            aria-label="Nível de zoom atual">100%</span>
                         <button id="zoom-in" class="px-2 py-1 text-xs bg-purple-100 dark:bg-purple-800 rounded"
-                            title="Aumentar zoom">
-                            <i class="fas fa-plus"></i>
+                            title="Aumentar zoom" aria-label="Aumentar zoom do canvas">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button id="undo-button" class="btn tooltip" data-tooltip="Desfazer (Ctrl+Z)" title="Desfazer">
-                        <i class="fas fa-undo"></i>
+                    <button id="undo-button" class="btn tooltip" data-tooltip="Desfazer (Ctrl+Z)" title="Desfazer"
+                        aria-label="Desfazer última ação">
+                        <i class="fas fa-undo" aria-hidden="true"></i>
                     </button>
-                    <button id="redo-button" class="btn tooltip" data-tooltip="Refazer (Ctrl+Y)" title="Refazer">
-                        <i class="fas fa-redo"></i>
+                    <button id="redo-button" class="btn tooltip" data-tooltip="Refazer (Ctrl+Y)" title="Refazer"
+                        aria-label="Refazer ação">
+                        <i class="fas fa-redo" aria-hidden="true"></i>
                     </button>
                     <div class="w-px h-6 bg-purple-200 dark:bg-purple-600"></div>
                     <button id="clear-button" class="btn tooltip" data-tooltip="Limpar (C)">
                         <i class="fas fa-trash"></i> Limpar
                     </button>
                     <button id="describe-button" class="btn tooltip" data-tooltip="Descrever Arte (D)">
-                        <i class="fas fa-robot"></i> IA
+                        <i class="fas fa-robot" aria-hidden="true"></i> IA
+                    </button>
+                    <button id="api-config-button" class="btn tooltip" data-tooltip="Configurar API Gemini (Ctrl+K)">
+                        <i class="fas fa-cog" aria-hidden="true"></i> API
                     </button>
                     <div class="w-px h-6 bg-purple-200 dark:bg-purple-600"></div>
                     <button id="export-button" class="btn tooltip" data-tooltip="Exportar PNG (E)">
-                        <i class="fas fa-download"></i> Exportar
+                        <i class="fas fa-download" aria-hidden="true"></i> Exportar
                     </button>
                 </div>
             </div>
@@ -679,6 +686,79 @@
             </div>
         </aside>
     </main>
+
+    <!-- Modal de Configuração da API -->
+    <div id="api-config-modal"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl p-6 mx-4 max-w-md w-full shadow-2xl border border-purple-200 dark:border-purple-700">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                    <i class="fas fa-robot text-purple-500"></i>
+                    Configurar API Gemini
+                </h3>
+                <button id="close-api-modal"
+                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    aria-label="Fechar modal de configuração da API">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="api-key-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        🔑 Sua API Key do Google Gemini:
+                    </label>
+                    <input type="password" id="api-key-input" placeholder="Cole sua API key aqui..."
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                </div>
+
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                        <div class="text-sm text-blue-700 dark:text-blue-300">
+                            <p><strong>Como obter sua API key:</strong></p>
+                            <ol class="list-decimal list-inside mt-1 space-y-1">
+                                <li>Acesse <a href="https://makersuite.google.com/app/apikey" target="_blank"
+                                        class="underline hover:text-blue-500" rel="noopener noreferrer">Google AI
+                                        Studio</a></li>
+                                <li>Faça login com sua conta Google</li>
+                                <li>Clique em "Create API Key"</li>
+                                <li>Cole a key aqui</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-shield-alt text-green-500 mt-0.5"></i>
+                        <div class="text-sm text-green-700 dark:text-green-300">
+                            <strong>🔒 Sua API key é segura:</strong>
+                            <p class="mt-1">Fica salva apenas no seu navegador (localStorage). Nunca enviamos para
+                                nossos servidores.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button id="save-api-key"
+                        class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        💾 Salvar
+                    </button>
+                    <button id="clear-api-key"
+                        class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        🗑️ Limpar
+                    </button>
+                </div>
+
+                <div id="api-status" class="text-center text-sm font-medium hidden">
+                    <!-- Status será inserido aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="js/script.js"></script>

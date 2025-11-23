@@ -1884,9 +1884,14 @@ function getTrianglePixels(startPixel, endPixel) {
   const pixels = Array.from(gridContainer.children);
 
   // Extract shape parameters
-  const shapeDimensions = getShapeDimensions(startPixel, endPixel, pixels, gridSize);
+  const shapeDimensions = getShapeDimensions(
+    startPixel,
+    endPixel,
+    pixels,
+    gridSize
+  );
   const { centerRow, centerCol, radius } = shapeDimensions;
-  
+
   console.log(
     `Triângulo - centro: (${centerRow},${centerCol}), raio: ${radius}`
   );
@@ -1895,14 +1900,14 @@ function getTrianglePixels(startPixel, endPixel) {
     document.querySelector('input[name="fill-mode"]:checked')?.value ||
     "outline";
   const isFilled = fillMode === "filled";
-  
+
   // Collect pixels for the triangle
   const trianglePixels = collectTrianglePixels(
-    centerRow, 
-    centerCol, 
-    radius, 
-    isFilled, 
-    gridSize, 
+    centerRow,
+    centerCol,
+    radius,
+    isFilled,
+    gridSize,
     pixels
   );
 
@@ -1927,24 +1932,31 @@ function getShapeDimensions(startPixel, endPixel, pixels, gridSize) {
     Math.abs(endCol - startCol)
   );
   const radius = Math.floor(size / 2);
-  
+
   return { centerRow, centerCol, radius };
 }
 
 // Helper function to collect triangle pixels
-function collectTrianglePixels(centerRow, centerCol, radius, isFilled, gridSize, pixels) {
+function collectTrianglePixels(
+  centerRow,
+  centerCol,
+  radius,
+  isFilled,
+  gridSize,
+  pixels
+) {
   const trianglePixels = [];
-  
+
   // Iterate through potential triangle area
   iterateTriangleArea(radius, (row, col) => {
     if (isInTriangle(row, col, radius, isFilled)) {
       const pixelRow = centerRow + row;
       const pixelCol = centerCol + col;
-      
+
       addPixelIfValid(pixelRow, pixelCol, gridSize, pixels, trianglePixels);
     }
   });
-  
+
   return trianglePixels;
 }
 
@@ -1986,22 +1998,27 @@ function getDiamondPixels(startPixel, endPixel) {
   const pixels = Array.from(gridContainer.children);
 
   // Extract shape parameters
-  const shapeDimensions = getShapeDimensions(startPixel, endPixel, pixels, gridSize);
+  const shapeDimensions = getShapeDimensions(
+    startPixel,
+    endPixel,
+    pixels,
+    gridSize
+  );
   const { centerRow, centerCol, radius } = shapeDimensions;
-  
+
   const fillMode =
     document.querySelector('input[name="fill-mode"]:checked')?.value ||
     "outline";
-    
+
   const isFilled = fillMode === "filled";
   const diamondPixels = [];
-  
+
   // Collect pixels for the diamond
   collectDiamondPixels(radius, (row, col) => {
     if (isInDiamond(row, col, radius, isFilled)) {
       const pixelRow = centerRow + row;
       const pixelCol = centerCol + col;
-      
+
       addPixelIfValid(pixelRow, pixelCol, gridSize, pixels, diamondPixels);
     }
   });
@@ -2483,7 +2500,15 @@ async function handleDescribeArt() {
 }
 
 async function callGeminiAPI(base64ImageData) {
-  const apiKey = "";
+  // Busca a API key do localStorage
+  const apiKey = localStorage.getItem("gemini-api-key");
+
+  if (!apiKey) {
+    throw new Error(
+      "⚙️ Configure sua API key do Gemini primeiro clicando no botão 'API'."
+    );
+  }
+
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
   const payload = {
@@ -3563,3 +3588,161 @@ function updateTooltipPositions() {
     }
   });
 }
+
+// === SISTEMA DE CONFIGURAÇÃO DA API GEMINI ===
+
+// Elementos do modal
+const apiConfigModal = document.getElementById("api-config-modal");
+const apiConfigButton = document.getElementById("api-config-button");
+const closeApiModal = document.getElementById("close-api-modal");
+const apiKeyInput = document.getElementById("api-key-input");
+const saveApiKeyBtn = document.getElementById("save-api-key");
+const clearApiKeyBtn = document.getElementById("clear-api-key");
+const apiStatus = document.getElementById("api-status");
+
+// Funções para gerenciar API key
+function loadApiKey() {
+  const savedKey = localStorage.getItem("gemini-api-key");
+  if (savedKey) {
+    apiKeyInput.value = savedKey;
+    updateApiStatus("✅ API configurada", "text-green-600 dark:text-green-400");
+    return true;
+  }
+  updateApiStatus(
+    "⚠️ API não configurada",
+    "text-yellow-600 dark:text-yellow-400"
+  );
+  return false;
+}
+
+function saveApiKey() {
+  const key = apiKeyInput.value.trim();
+
+  if (!key) {
+    updateApiStatus(
+      "❌ Digite uma API key válida",
+      "text-red-600 dark:text-red-400"
+    );
+    return;
+  }
+
+  // Validação básica do formato da API key
+  if (!key.startsWith("AIza") || key.length < 30) {
+    updateApiStatus(
+      "❌ Formato de API key inválido",
+      "text-red-600 dark:text-red-400"
+    );
+    return;
+  }
+
+  localStorage.setItem("gemini-api-key", key);
+  updateApiStatus(
+    "✅ API salva com sucesso!",
+    "text-green-600 dark:text-green-400"
+  );
+  updateApiButtonStatus();
+
+  setTimeout(() => {
+    closeModal();
+  }, 1500);
+}
+
+function clearApiKey() {
+  localStorage.removeItem("gemini-api-key");
+  apiKeyInput.value = "";
+  updateApiStatus("🗑️ API removida", "text-gray-600 dark:text-gray-400");
+  updateApiButtonStatus();
+}
+
+function updateApiStatus(message, className) {
+  apiStatus.textContent = message;
+  apiStatus.className = `text-center text-sm font-medium ${className}`;
+  apiStatus.classList.remove("hidden");
+}
+
+function openModal() {
+  apiConfigModal?.classList.remove("hidden");
+  loadApiKey();
+  apiKeyInput?.focus();
+}
+
+function closeModal() {
+  apiConfigModal?.classList.add("hidden");
+  apiStatus?.classList.add("hidden");
+}
+
+function updateApiButtonStatus() {
+  const hasApiKey = localStorage.getItem("gemini-api-key");
+
+  if (describeButton) {
+    if (hasApiKey) {
+      describeButton.setAttribute("data-tooltip", "Descrever Arte com IA (D)");
+    } else {
+      describeButton.setAttribute(
+        "data-tooltip",
+        "Configure a API primeiro (clique em API)"
+      );
+    }
+  }
+
+  if (apiConfigButton) {
+    // Remover estilos inline para usar estilos CSS padrão
+    apiConfigButton.style.backgroundColor = "";
+    apiConfigButton.style.borderColor = "";
+    apiConfigButton.style.color = "";
+
+    // Remover classes de status anterior
+    apiConfigButton.classList.remove("api-configured", "api-not-configured");
+
+    if (hasApiKey) {
+      apiConfigButton.setAttribute(
+        "data-tooltip",
+        "API Configurada ✅ (Ctrl+K)"
+      );
+      apiConfigButton.classList.add("api-configured");
+    } else {
+      apiConfigButton.setAttribute(
+        "data-tooltip",
+        "Configurar API Gemini (Ctrl+K)"
+      );
+      apiConfigButton.classList.add("api-not-configured");
+    }
+  }
+}
+
+// Event listeners para o modal
+apiConfigButton?.addEventListener("click", openModal);
+closeApiModal?.addEventListener("click", closeModal);
+saveApiKeyBtn?.addEventListener("click", saveApiKey);
+clearApiKeyBtn?.addEventListener("click", clearApiKey);
+
+// Fechar modal clicando fora
+apiConfigModal?.addEventListener("click", (e) => {
+  if (e.target === apiConfigModal) {
+    closeModal();
+  }
+});
+
+// Salvar com Enter
+apiKeyInput?.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    saveApiKey();
+  }
+});
+
+// Atalho de teclado para abrir configuração (Ctrl+K)
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey && e.key === "k") {
+    e.preventDefault();
+    openModal();
+  }
+});
+
+// Inicializar status da API quando a página carregar
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", updateApiButtonStatus);
+} else {
+  updateApiButtonStatus();
+}
+
+// === FIM DO SISTEMA DE CONFIGURAÇÃO DA API ===
